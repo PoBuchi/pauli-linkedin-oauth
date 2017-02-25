@@ -1,0 +1,1 @@
+An implementation of the LinkedIn OAuth flow. See the [Meteor Guide](https://guide.meteor.com/accounts.html) for more details.
