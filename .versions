@@ -38,7 +38,7 @@ oauth@1.1.13
 oauth2@1.1.11
 observe-sequence@1.0.15
 ordered-dict@1.0.9
-pauli:linkedin-oauth@1.0.0
+pauli:linkedin-oauth@1.1.0
 promise@0.8.8
 random@1.0.10
 rate-limit@1.0.6
