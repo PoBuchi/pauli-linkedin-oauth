@@ -6,6 +6,7 @@ LinkedIn = {};
 //   completion. Takes one argument, credentialToken on success, or Error on
 //   error.
 LinkedIn.requestCredential = function (options, credentialRequestCompleteCallback) {
+  console.log('🔑', 'LinkedIn.requestCredential');
   // support both (options, callback) and (callback).
   if (!credentialRequestCompleteCallback && typeof options === 'function') {
     credentialRequestCompleteCallback = options;
@@ -13,8 +14,10 @@ LinkedIn.requestCredential = function (options, credentialRequestCompleteCallbac
   }
 
   const config = ServiceConfiguration.configurations.findOne({service: 'linkedin'});
+  console.log('🔑 config', config);
   if (!config) {
     credentialRequestCompleteCallback && credentialRequestCompleteCallback(new ServiceConfiguration.ConfigError("Service not configured"));
+    console.log('🔑', 'returning no config');
     return;
   }
 
