@@ -43,7 +43,7 @@ OAuth.registerService('linkedin', 2, null, function(query) {
 
 var getExtraData = function(accessToken, extraFields, fields) {
   var url = 'https://api.linkedin.com/v1/people/~:(' + extraFields + ')';
-  var response = Meteor.http.get(url, {
+  var response = HTTP.get(url, {
     params: {
       oauth2_access_token: accessToken,
       format: 'json'
@@ -73,7 +73,7 @@ var getTokenResponse = function (query) {
   var responseContent;
   try {
     //Request an access token
-    responseContent = Meteor.http.post(
+    responseContent = HTTP.post(
        "https://api.linkedin.com/uas/oauth2/accessToken", {
          params: {
            grant_type: 'authorization_code',
@@ -110,7 +110,7 @@ var getTokenResponse = function (query) {
 
 var getIdentity = function (accessToken) {
   try {
-    return Meteor.http.get("https://www.linkedin.com/v1/people/~", {
+    return HTTP.get("https://www.linkedin.com/v1/people/~", {
       params: {oauth2_access_token: accessToken, format: 'json'}}).data;
   } catch (err) {
     throw new Error("Failed to fetch identity from LinkedIn. " + err.message);
