@@ -35,7 +35,7 @@ npm-mongo@2.2.33
 oauth@1.2.1
 oauth2@1.2.0
 ordered-dict@1.1.0
-pauli:linkedin-oauth@3.0.0
+pauli:linkedin-oauth@3.1.0
 promise@0.10.1
 random@1.1.0
 rate-limit@1.0.8
