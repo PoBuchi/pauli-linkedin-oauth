@@ -1,122 +1,166 @@
-LinkedIn = {};
+LinkedIn = {}
 
-OAuth.registerService('linkedin', 2, null, function(query) {
-
-  var response = getTokenResponse(query);
-  var accessToken = response.accessToken;
-  var identity = getIdentity(accessToken);
-
-  var id = identity.id;
-  if (!id) {
-    throw new Error("LinkedIn did not provide an id");
+const getImage = profilePicture => {
+  const image = []
+  for (const element of profilePicture['displayImage~']
+    .elements) {
+    for (const identifier of element.identifiers) {
+      image.push(identifier.identifier)
+    }
   }
-  var serviceData = {
-    id: id,
-    accessToken: accessToken,
-    expiresAt: (+new Date) + (1000 * response.expiresIn)
-  };
-
-  var whiteListed = ['firstName', 'headline', 'lastName'];
-
-  // include all fields from linkedin
-  // https://developer.linkedin.com/documents/authentication
-  var fields = _.pick(identity, whiteListed);
-
-  // list of extra fields
-  // http://developer.linkedin.com/documents/profile-fields
-  var extraFields = 'email-address,location:(name),num-connections,picture-url,public-profile-url,skills,languages,three-current-positions,recommendations-received,positions,picture-urls::(original)';
-
-  // remove the whitespaces which could break the request
-  extraFields = extraFields.replace(/\s+/g, '');
-
-  fields = getExtraData(accessToken, extraFields, fields);
-
-  _.extend(serviceData, fields);
-
   return {
-    serviceData: serviceData,
-    options: {
-      profile: fields
-    }
-  };
-});
+    displayImage: profilePicture.displayImage,
+    identifiersUrl: image,
+  }
+}
 
-var getExtraData = function(accessToken, extraFields, fields) {
-  var url = 'https://api.linkedin.com/v1/people/~:(' + extraFields + ')';
-  var response = HTTP.get(url, {
-    params: {
-      oauth2_access_token: accessToken,
-      format: 'json'
-    }
-  }).data;
-  return _.extend(fields, response);
+// Request for email, returns array
+const getEmail = function(accessToken) {
+  const url = encodeURI(
+    `https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))&oauth2_access_token=${accessToken}`,
+  )
+  const response = HTTP.get(url).data
+  const emails = []
+  for (const element of response.elements) {
+    emails.push(element['handle~'].emailAddress)
+  }
+  return emails
 }
 
 // checks whether a string parses as JSON
-var isJSON = function (str) {
+const isJSON = function(str) {
   try {
-    JSON.parse(str);
-    return true;
+    JSON.parse(str)
+    return true
   } catch (e) {
-    return false;
+    return false
   }
 }
 
 // returns an object containing:
 // - accessToken
 // - expiresIn: lifetime of token in seconds
-var getTokenResponse = function (query) {
-  var config = ServiceConfiguration.configurations.findOne({service: 'linkedin'});
+const getTokenResponse = function(query) {
+  const config = ServiceConfiguration.configurations.findOne(
+    { service: 'linkedin' },
+  )
   if (!config)
-    throw new ServiceConfiguration.ConfigError("Service not configured");
+    throw new ServiceConfiguration.ConfigError(
+      'Service not configured',
+    )
 
-  var responseContent;
+  let responseContent
   try {
-    //Request an access token
+    // Request an access token
     responseContent = HTTP.post(
-       "https://api.linkedin.com/uas/oauth2/accessToken", {
-         params: {
-           grant_type: 'authorization_code',
-           client_id: config.clientId,
-           client_secret: OAuth.openSecret(config.secret),
-           code: query.code,
-           redirect_uri: OAuth._redirectUri('linkedin', config)
-         }
-       }).content;
+      'https://api.linkedin.com/uas/oauth2/accessToken',
+      {
+        params: {
+          grant_type: 'authorization_code',
+          client_id: config.clientId,
+          client_secret: OAuth.openSecret(config.secret),
+          code: query.code,
+          redirect_uri: OAuth._redirectUri(
+            'linkedin',
+            config,
+          ),
+        },
+      },
+    ).content
   } catch (err) {
-    throw new Error("Failed to complete OAuth handshake with LinkedIn. " + err.message);
+    throw new Error(
+      `Failed to complete OAuth handshake with LinkedIn. ${
+        err.message
+      }`,
+    )
   }
 
   // If 'responseContent' does not parse as JSON, it is an error.
   if (!isJSON(responseContent)) {
-    throw new Error("Failed to complete OAuth handshake with LinkedIn. " + responseContent);
+    throw new Error(
+      `Failed to complete OAuth handshake with LinkedIn. ${responseContent}`,
+    )
   }
 
   // Success! Extract access token and expiration
-  var parsedResponse = JSON.parse(responseContent);
-  var accessToken = parsedResponse.access_token;
-  var expiresIn = parsedResponse.expires_in;
+  const parsedResponse = JSON.parse(responseContent)
+  const accessToken = parsedResponse.access_token
+  const expiresIn = parsedResponse.expires_in
 
   if (!accessToken) {
-    throw new Error("Failed to complete OAuth handshake with LinkedIn " +
-      "-- can't find access token in HTTP response. " + responseContent);
+    throw new Error(
+      'Failed to complete OAuth handshake with LinkedIn ' +
+        `-- can't find access token in HTTP response. ${responseContent}`,
+    )
   }
 
   return {
-    accessToken: accessToken,
-    expiresIn: expiresIn
-  };
-};
-
-var getIdentity = function (accessToken) {
-  try {
-    return HTTP.get("https://www.linkedin.com/v1/people/~", {
-      params: {oauth2_access_token: accessToken, format: 'json'}}).data;
-  } catch (err) {
-    throw new Error("Failed to fetch identity from LinkedIn. " + err.message);
+    accessToken,
+    expiresIn,
   }
-};
+}
 
-LinkedIn.retrieveCredential = function(credentialToken, credentialSecret) {
-  return OAuth.retrieveCredential(credentialToken, credentialSecret);
-};
+// Request available fields from r_liteprofile
+const getIdentity = function(accessToken) {
+  try {
+    const url = encodeURI(
+      `https://api.linkedin.com/v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))&oauth2_access_token=${accessToken}`,
+    )
+    return HTTP.get(url).data
+  } catch (err) {
+    throw new Error(
+      `Failed to fetch identity from LinkedIn. ${
+        err.message
+      }`,
+    )
+  }
+}
+
+OAuth.registerService('linkedin', 2, null, query => {
+  const response = getTokenResponse(query)
+  const accessToken = response.accessToken
+  const identity = getIdentity(accessToken)
+
+  const {
+    id,
+    firstName,
+    lastName,
+    profilePicture,
+  } = identity
+
+  if (!id) {
+    throw new Error('LinkedIn did not provide an id')
+  }
+  const serviceData = {
+    id,
+    accessToken,
+    expiresAt: +new Date() + 1000 * response.expiresIn,
+  }
+
+  const fields = {
+    linkedinId: id,
+    firstName,
+    lastName,
+    profilePicture: getImage(profilePicture),
+    email: getEmail(accessToken),
+  }
+
+  _.extend(serviceData, fields)
+
+  return {
+    serviceData,
+    options: {
+      profile: fields,
+    },
+  }
+})
+
+LinkedIn.retrieveCredential = function(
+  credentialToken,
+  credentialSecret,
+) {
+  return OAuth.retrieveCredential(
+    credentialToken,
+    credentialSecret,
+  )
+}
