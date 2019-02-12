@@ -15,7 +15,7 @@ const getImage = profilePicture => {
 }
 
 // Request for email, returns array
-const getEmail = function(accessToken) {
+const getRegisteredEmails = function(accessToken) {
   const url = encodeURI(
     `https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))&oauth2_access_token=${accessToken}`,
   )
@@ -24,7 +24,7 @@ const getEmail = function(accessToken) {
   for (const element of response.elements) {
     emails.push(element['handle~'].emailAddress)
   }
-  return emails
+  return emails;
 }
 
 // checks whether a string parses as JSON
@@ -137,12 +137,20 @@ OAuth.registerService('linkedin', 2, null, query => {
     expiresAt: +new Date() + 1000 * response.expiresIn,
   }
 
+  const registeredEmails = getRegisteredEmails(accessToken)
+
   const fields = {
     linkedinId: id,
     firstName,
     lastName,
     profilePicture: getImage(profilePicture),
-    email: getEmail(accessToken),
+    registeredEmails,
+  }
+
+  if (registeredEmails.length) {
+    const primaryEmail = registeredEmails[0]
+    fields.emailAddress = primaryEmail;
+    fields.email = primaryEmail;
   }
 
   _.extend(serviceData, fields)
