@@ -1,6 +1,6 @@
 Package.describe({
   name: 'pauli:linkedin-oauth',
-  version: '4.1.0',
+  version: '4.2.0',
   summary: 'LinkedIn OAuth flow, use with Meteor 1.6.1 & up',
   git: 'https://github.com/PoBuchi/pauli-linkedin-oauth',
   documentation: 'README.md'
