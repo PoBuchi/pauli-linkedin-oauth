@@ -149,7 +149,7 @@ OAuth.registerService('linkedin', 2, null, query => {
 
   if (emails.length) {
     const primaryEmail = emails[0]
-    fields.emailAddress = primaryEmail
+    fields.emailAddress = primaryEmail // for backward compatibility with previous versions of this package
     fields.email = primaryEmail
   }
 
