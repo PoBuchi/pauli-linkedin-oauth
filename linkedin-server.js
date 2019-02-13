@@ -24,7 +24,7 @@ const getRegisteredEmails = function(accessToken) {
   for (const element of response.elements) {
     emails.push(element['handle~'].emailAddress)
   }
-  return emails;
+  return emails
 }
 
 // checks whether a string parses as JSON
@@ -149,8 +149,8 @@ OAuth.registerService('linkedin', 2, null, query => {
 
   if (registeredEmails.length) {
     const primaryEmail = registeredEmails[0]
-    fields.emailAddress = primaryEmail;
-    fields.email = primaryEmail;
+    fields.emailAddress = primaryEmail
+    fields.email = primaryEmail
   }
 
   _.extend(serviceData, fields)
