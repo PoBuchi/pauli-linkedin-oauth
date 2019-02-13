@@ -34,8 +34,9 @@ LinkedIn.requestCredential = function(
   const credentialToken = Random.secret()
 
   let scope
-  if (options && options.requestPermissions) {
-    scope = options.requestPermissions.join('+')
+  const { requestPermissions, ...otherOptionsToPassThrough } = options
+  if (requestPermissions) {
+    scope = requestPermissions.join('+')
   } else {
     // If extra permissions not passed, we need to request basic, available to all
     scope = 'r_emailaddress+r_liteprofile'
@@ -45,6 +46,11 @@ LinkedIn.requestCredential = function(
     config,
     options,
   )
+  if (!otherOptionsToPassThrough.popupOptions) {
+    // the default dimensions (https://github.com/meteor/meteor/blob/release-1.6.1/packages/oauth/oauth_browser.js#L15) don't play well with the content shown by linkedin
+    // so override popup dimensions to something appropriate (might have to change if LinkedIn login page changes its layout)
+    otherOptionsToPassThrough.popupOptions = { width: 390, height: 628 }
+  }
 
   const loginUrl = `https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id=${
     config.clientId
@@ -62,5 +68,6 @@ LinkedIn.requestCredential = function(
     loginService: 'linkedin',
     loginStyle,
     loginUrl,
+    ...otherOptionsToPassThrough,
   })
 }
