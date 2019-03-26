@@ -2,15 +2,16 @@ LinkedIn = {}
 
 const getImage = profilePicture => {
   const image = []
-  for (const element of profilePicture['displayImage~']
-    .elements) {
-    for (const identifier of element.identifiers) {
-      image.push(identifier.identifier)
+  if (profilePicture !== undefined){
+    for (const element of profilePicture['displayImage~'].elements) {
+      for (const identifier of element.identifiers) {
+        image.push(identifier.identifier)
+      }
     }
   }
   return {
-    displayImage: profilePicture.displayImage,
-    identifiersUrl: image,
+    displayImage: profilePicture ? profilePicture.displayImage : null,
+    identifiersUrl: image
   }
 }
 
