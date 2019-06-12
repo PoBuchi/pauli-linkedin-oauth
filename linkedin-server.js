@@ -1,4 +1,4 @@
-LinkedIn = {}
+Linkedin = {}
 
 const getImage = profilePicture => {
   const image = []
@@ -70,7 +70,7 @@ const getTokenResponse = function(query) {
     ).content
   } catch (err) {
     throw new Error(
-      `Failed to complete OAuth handshake with LinkedIn. ${
+      `Failed to complete OAuth handshake with Linkedin. ${
         err.message
       }`,
     )
@@ -79,7 +79,7 @@ const getTokenResponse = function(query) {
   // If 'responseContent' does not parse as JSON, it is an error.
   if (!isJSON(responseContent)) {
     throw new Error(
-      `Failed to complete OAuth handshake with LinkedIn. ${responseContent}`,
+      `Failed to complete OAuth handshake with Linkedin. ${responseContent}`,
     )
   }
 
@@ -90,7 +90,7 @@ const getTokenResponse = function(query) {
 
   if (!accessToken) {
     throw new Error(
-      'Failed to complete OAuth handshake with LinkedIn ' +
+      'Failed to complete OAuth handshake with Linkedin ' +
         `-- can't find access token in HTTP response. ${responseContent}`,
     )
   }
@@ -110,7 +110,7 @@ const getIdentity = function(accessToken) {
     return HTTP.get(url).data
   } catch (err) {
     throw new Error(
-      `Failed to fetch identity from LinkedIn. ${
+      `Failed to fetch identity from Linkedin. ${
         err.message
       }`,
     )
@@ -130,7 +130,7 @@ OAuth.registerService('linkedin', 2, null, query => {
   } = identity
 
   if (!id) {
-    throw new Error('LinkedIn did not provide an id')
+    throw new Error('Linkedin did not provide an id')
   }
   const serviceData = {
     id,
@@ -164,7 +164,7 @@ OAuth.registerService('linkedin', 2, null, query => {
   }
 })
 
-LinkedIn.retrieveCredential = function(
+Linkedin.retrieveCredential = function(
   credentialToken,
   credentialSecret,
 ) {
